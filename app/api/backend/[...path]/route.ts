@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://83.228.192.104:18081/";
+const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8081";
 
 async function forward(req: NextRequest, pathSegments: string[]) {
   const incomingUrl = new URL(req.url);
@@ -28,7 +28,8 @@ async function forward(req: NextRequest, pathSegments: string[]) {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
-  return forward(req, params.path);
+  const { path } = await context.params;
+  return forward(req, path);
 }
