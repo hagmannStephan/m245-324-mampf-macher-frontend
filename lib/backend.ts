@@ -32,7 +32,6 @@ export async function searchRecipes(params: {
 }): Promise<Recipe[]> {
   const qs = new URLSearchParams();
 
-  // Backend erwartet: ?ingredients=a&ingredients=b&preferences=x&preferences=y
   params.ingredients.forEach((i) => qs.append("ingredients", i));
   params.preferences.forEach((p) => qs.append("preferences", p));
 

@@ -17,7 +17,6 @@ export default function Home() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial laden (Ingredients + Preferences)
   useEffect(() => {
     let cancelled = false;
 
@@ -49,9 +48,7 @@ export default function Home() {
   }, []);
 
   const canSearch = useMemo(() => {
-    // Dein Backend braucht aktuell beide Params,
-    // also erzwingen wir hier mind. 1 Ingredient und 1 Preference.
-    return selectedIngredients.length > 0 && selectedPreferences.length > 0;
+    return selectedIngredients.length > 0;
   }, [selectedIngredients.length, selectedPreferences.length]);
 
   async function onSearch() {
@@ -123,7 +120,7 @@ export default function Home() {
 
               {!canSearch && (
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  Bitte mindestens 1 Zutat und 1 Präferenz auswählen.
+                  Bitte mindestens 1 Zutat auswählen.
                 </p>
               )}
             </div>
