@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import MultiSelect from "@/components/MultiSelect";
 import { getIngredients, getPreferences, searchRecipes } from "@/lib/backend";
 import type { Recipe } from "@/lib/types";
+import { useCart } from "@/components/cart/CartContext";
 
 export default function Home() {
+  const { addItem } = useCart();
+
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<string[]>([]);
 
@@ -17,6 +20,7 @@ export default function Home() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Initial laden (Ingredients + Preferences)
   useEffect(() => {
     let cancelled = false;
 
@@ -31,6 +35,7 @@ export default function Home() {
         ]);
 
         if (cancelled) return;
+
         setIngredients(ing);
         setPreferences(pref);
       } catch (e) {
@@ -47,9 +52,10 @@ export default function Home() {
     };
   }, []);
 
+  // Präferenzen sind optional -> nur Zutaten müssen gewählt sein
   const canSearch = useMemo(() => {
     return selectedIngredients.length > 0;
-  }, [selectedIngredients.length, selectedPreferences.length]);
+  }, [selectedIngredients.length]);
 
   async function onSearch() {
     setLoadingSearch(true);
@@ -58,7 +64,7 @@ export default function Home() {
     try {
       const data = await searchRecipes({
         ingredients: selectedIngredients,
-        preferences: selectedPreferences,
+        preferences: selectedPreferences, // darf leer sein
       });
       setRecipes(data);
     } catch (e) {
@@ -69,13 +75,20 @@ export default function Home() {
     }
   }
 
+  function addRecipeIngredientsToCart(r: Recipe) {
+    r.ingredients.forEach((ing) => {
+      // id = name reicht bis Cart MS da ist
+      addItem({ id: ing.name, name: ing.name, unit: "Stk" }, 1);
+    });
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 px-4 py-10 text-zinc-900 dark:bg-black dark:text-zinc-50">
       <div className="mx-auto w-full max-w-5xl">
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">MampfMacher</h1>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Wähle Zutaten & Präferenzen und finde passende Rezepte.
+            Wähle Zutaten (Präferenzen optional) und finde passende Rezepte.
           </p>
         </header>
 
@@ -99,8 +112,9 @@ export default function Home() {
                 onChange={setSelectedIngredients}
                 placeholder="Zutat suchen..."
               />
+
               <MultiSelect
-                title="Präferenzen"
+                title="Präferenzen (optional)"
                 options={preferences}
                 selected={selectedPreferences}
                 onChange={setSelectedPreferences}
@@ -123,6 +137,18 @@ export default function Home() {
                   Bitte mindestens 1 Zutat auswählen.
                 </p>
               )}
+
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Ausgewählt:{" "}
+                <span className="font-medium">
+                  {selectedIngredients.length}
+                </span>{" "}
+                Zutaten,{" "}
+                <span className="font-medium">
+                  {selectedPreferences.length}
+                </span>{" "}
+                Präferenzen
+              </div>
             </div>
 
             <section className="mt-8">
@@ -184,8 +210,16 @@ export default function Home() {
                           ))}
                         </div>
 
-                        {r.recipeUrl ? (
-                          <div className="mt-4">
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => addRecipeIngredientsToCart(r)}
+                            className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
+                          >
+                            Zutaten in Warenkorb
+                          </button>
+
+                          {r.recipeUrl ? (
                             <a
                               href={r.recipeUrl}
                               target="_blank"
@@ -194,8 +228,8 @@ export default function Home() {
                             >
                               Rezept öffnen
                             </a>
-                          </div>
-                        ) : null}
+                          ) : null}
+                        </div>
                       </article>
                     );
                   })}
