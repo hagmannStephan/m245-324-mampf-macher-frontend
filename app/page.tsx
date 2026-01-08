@@ -20,7 +20,6 @@ export default function Home() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial laden (Ingredients + Preferences)
   useEffect(() => {
     let cancelled = false;
 
