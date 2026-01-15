@@ -23,7 +23,7 @@ export default function CheckoutPage() {
         fullName,
         email,
         address,
-        items, // kommt aus useCart()
+        items: null,
       };
 
       const res = await fetch("/api/checkout/checkout", {
