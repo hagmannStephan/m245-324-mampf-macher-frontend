@@ -15,11 +15,33 @@ export default function CheckoutPage() {
     return items.length > 0 && fullName.trim() && email.trim() && address.trim();
   }, [items.length, fullName, email, address]);
 
-  function submit() {
-    setMsg(
-      "Checkout Microservice ist noch nicht angebunden. Bestellung wurde lokal simuliert."
-    );
-    clear();
+  async function submit() {
+    try {
+      setMsg(null);
+
+      const payload = {
+        fullName,
+        email,
+        address,
+        items, // kommt aus useCart()
+      };
+
+      const res = await fetch("/api/checkout/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Checkout fehlgeschlagen (${res.status}): ${text}`);
+      }
+
+      setMsg("Bestellung erfolgreich abgesendet.");
+      clear();
+    } catch (e: any) {
+      setMsg(e?.message ?? "Checkout fehlgeschlagen.");
+    }
   }
 
   return (

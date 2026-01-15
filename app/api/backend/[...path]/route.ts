@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8081";
+const BACKEND_URL = process.env.BACKEND_URL ?? "http://83.228.192.104:18081";
 
 async function forward(req: NextRequest, pathSegments: string[]) {
   const incomingUrl = new URL(req.url);
